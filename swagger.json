@@ -1,0 +1,188 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Unified Event Analytics Engine",
+    "version": "1.0.0",
+    "description": "API documentation for the Unified Event Analytics Engine."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register a new app and generate an API key",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "app_name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" }
+                },
+                "required": ["app_name", "email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successfully registered",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Registered successfully",
+                  "apiKey": "abc123xyz456"
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing required fields" }
+        }
+      }
+    },
+    "/api/auth/api-key": {
+      "get": {
+        "summary": "Retrieve API key for a registered app",
+        "tags": ["Auth"],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "email" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "API key retrieved",
+            "content": {
+              "application/json": {
+                "example": { "apiKey": "abc123xyz456" }
+              }
+            }
+          },
+          "400": { "description": "Email is required" }
+        }
+      }
+    },
+    "/api/auth/revoke": {
+      "post": {
+        "summary": "Revoke an API key",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "API key revoked" },
+          "400": { "description": "Missing email" }
+        }
+      }
+    },
+    "/api/analytics/collect": {
+      "post": {
+        "summary": "Collect analytics events",
+        "tags": ["Analytics"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "event": { "type": "string" },
+                  "url": { "type": "string" },
+                  "referrer": { "type": "string" },
+                  "device": { "type": "string" },
+                  "ipAddress": { "type": "string" },
+                  "timestamp": { "type": "string", "format": "date-time" },
+                  "metadata": { "type": "object" }
+                },
+                "required": ["event", "url", "timestamp"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Event collected successfully" },
+          "400": { "description": "Missing required fields" }
+        }
+      }
+    },
+    "/api/analytics/event-summary": {
+      "get": {
+        "summary": "Retrieve analytics summary for a specific event type",
+        "tags": ["Analytics"],
+        "parameters": [
+          { "name": "event", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "startDate", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "endDate", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "app_id", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analytics summary retrieved",
+            "content": {
+              "application/json": {
+                "example": {
+                  "event": "click",
+                  "count": 3400,
+                  "uniqueUsers": 1200,
+                  "deviceData": {
+                    "mobile": 2200,
+                    "desktop": 1200
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analytics/user-stats": {
+      "get": {
+        "summary": "Retrieve user statistics based on unique users",
+        "tags": ["Analytics"],
+        "parameters": [
+          { "name": "userId", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "User stats retrieved",
+            "content": {
+              "application/json": {
+                "example": {
+                  "userId": "user789",
+                  "totalEvents": 150,
+                  "deviceDetails": {
+                    "browser": "Chrome",
+                    "os": "Android"
+                  },
+                  "ipAddress": "192.168.1.1"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
